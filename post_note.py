@@ -111,43 +111,37 @@ def save_to_google_docs(title, content):
     creds = service_account.Credentials.from_service_account_info(
         creds_dict,
         scopes=[
+            "https://www.googleapis.com/auth/drive.file",
             "https://www.googleapis.com/auth/drive",
-            "https://www.googleapis.com/auth/documents",
         ]
     )
 
-    docs_service = build("docs", "v1", credentials=creds)
     drive_service = build("drive", "v3", credentials=creds)
 
     today = date.today().strftime("%Y/%m/%d")
     doc_title = f"【{today}】{title}"
 
-    doc = docs_service.documents().create(body={"title": doc_title}).execute()
-    doc_id = doc["documentId"]
+    file_metadata = {
+        "name": doc_title,
+        "mimeType": "application/vnd.google-apps.document",
+        "parents": [FOLDER_ID],
+    }
 
-    docs_service.documents().batchUpdate(
-        documentId=doc_id,
-        body={
-            "requests": [
-                {
-                    "insertText": {
-                        "location": {"index": 1},
-                        "text": content
-                    }
-                }
-            ]
-        }
-    ).execute()
+    from googleapiclient.http import MediaInMemoryUpload
+    media = MediaInMemoryUpload(
+        content.encode("utf-8"),
+        mimetype="text/plain",
+        resumable=False
+    )
 
-    drive_service.files().update(
-        fileId=doc_id,
-        addParents=FOLDER_ID,
-        removeParents="root",
-        fields="id, parents"
+    file = drive_service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields="id"
     ).execute()
 
     print(f"Googleドキュメントに保存しました：{doc_title}")
-    return doc_id
+    return file.get("id")
 
 def main():
     theme = random.choice(THEMES)

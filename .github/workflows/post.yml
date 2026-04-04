@@ -2,7 +2,7 @@ name: 牡羊座ホロスコープ自動投稿
 
 on:
   schedule:
-    - cron: '0 22 * * *'  # 毎日 JST 7:00（UTC 22:00）
+    - cron: '0 22 * * *'  # 毎日 JST 6:00（UTC 22:00）
   workflow_dispatch:
 
 jobs:

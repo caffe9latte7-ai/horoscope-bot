@@ -6,7 +6,7 @@ from google import genai
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
-FOLDER_ID = "1TEFffyaYkliHKimblstikYCoR4g7wKue"
+FOLDER_ID = None
 
 THEMES = [
     {
@@ -120,7 +120,6 @@ def save_to_google_docs(title, content):
 
     file_metadata = {
         "name": doc_title,
-        "parents": [FOLDER_ID],
     }
 
     from googleapiclient.http import MediaInMemoryUpload

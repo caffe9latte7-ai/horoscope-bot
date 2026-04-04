@@ -124,7 +124,6 @@ def save_to_google_docs(title, content):
     file_metadata = {
         "name": doc_title,
         "mimeType": "application/vnd.google-apps.document",
-        "parents": [FOLDER_ID],
     }
 
     from googleapiclient.http import MediaInMemoryUpload
@@ -140,8 +139,16 @@ def save_to_google_docs(title, content):
         fields="id"
     ).execute()
 
+    file_id = file.get("id")
+
+    drive_service.files().update(
+        fileId=file_id,
+        addParents=FOLDER_ID,
+        fields="id, parents"
+    ).execute()
+
     print(f"Googleドキュメントに保存しました：{doc_title}")
-    return file.get("id")
+    return file_id
 
 def main():
     theme = random.choice(THEMES)

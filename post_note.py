@@ -105,7 +105,7 @@ def generate_article(theme):
     )
     return response.text.strip()
 
-ddef save_to_google_docs(title, content):
+def save_to_google_docs(title, content):
     creds_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
     creds_dict = json.loads(creds_json)
     creds = service_account.Credentials.from_service_account_info(

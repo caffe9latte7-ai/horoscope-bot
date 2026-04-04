@@ -108,6 +108,8 @@ def send_email(title, content):
     sender = os.getenv("GMAIL_ADDRESS")
     password = os.getenv("GMAIL_APP_PASSWORD")
     receiver = os.getenv("GMAIL_ADDRESS")
+    print(f"sender: {sender}")
+    print(f"password length: {len(password) if password else 'None'}")
 
     today = date.today().strftime("%Y/%m/%d")
     subject = f"【note記事】{today}：{title}"

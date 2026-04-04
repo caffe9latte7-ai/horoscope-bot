@@ -1,12 +1,11 @@
 import os
 import json
 import random
+import smtplib
 from datetime import date
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from google import genai
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
-
-FOLDER_ID = None
 
 THEMES = [
     {
@@ -58,7 +57,7 @@ THEMES = [
 """
     },
     {
-        "title": "Cafetalkとitalkiはどこどこがどこどこでどこどこが違う【使い分け術】",
+        "title": "Cafetalkとitalkiはここどこどこが違う【使い分け術】",
         "prompt": """
 オンライン日本語教師のとうかさんの実体験をもとに記事を書いてください。
 
@@ -105,37 +104,25 @@ def generate_article(theme):
     )
     return response.text.strip()
 
-def save_to_google_docs(title, content):
-    creds_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
-    creds_dict = json.loads(creds_json)
-    creds = service_account.Credentials.from_service_account_info(
-        creds_dict,
-        scopes=["https://www.googleapis.com/auth/drive"]
-    )
-
-    drive_service = build("drive", "v3", credentials=creds)
+def send_email(title, content):
+    sender = os.getenv("GMAIL_ADDRESS")
+    password = os.getenv("GMAIL_APP_PASSWORD")
+    receiver = os.getenv("GMAIL_ADDRESS")
 
     today = date.today().strftime("%Y/%m/%d")
-    doc_title = f"【{today}】{title}.txt"
+    subject = f"【note記事】{today}：{title}"
 
-    file_metadata = {
-        "name": doc_title,
-    }
+    msg = MIMEMultipart()
+    msg["From"] = sender
+    msg["To"] = receiver
+    msg["Subject"] = subject
+    msg.attach(MIMEText(content, "plain", "utf-8"))
 
-    from googleapiclient.http import MediaInMemoryUpload
-    media = MediaInMemoryUpload(
-        content.encode("utf-8"),
-        mimetype="text/plain",
-    )
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender, password)
+        server.send_message(msg)
 
-    file = drive_service.files().create(
-        body=file_metadata,
-        media_body=media,
-        fields="id"
-    ).execute()
-
-    print(f"保存しました：{doc_title}")
-    return file.get("id")
+    print(f"メール送信完了：{subject}")
 
 def main():
     theme = random.choice(THEMES)
@@ -145,8 +132,8 @@ def main():
     article = generate_article(theme)
     print(f"生成完了！\n{article[:100]}...\n")
 
-    print("Googleドキュメントに保存中...")
-    save_to_google_docs(theme["title"], article)
+    print("メールを送信中...")
+    send_email(theme["title"], article)
     print("完了！")
 
 if __name__ == "__main__":

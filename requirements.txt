@@ -2,3 +2,5 @@ google-genai
 kerykeion
 tweepy
 python-dotenv
+google-api-python-client>=2.0.0
+google-auth>=2.0.0

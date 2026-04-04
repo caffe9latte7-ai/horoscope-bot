@@ -1,0 +1,4 @@
+google-genai
+kerykeion
+tweepy
+python-dotenv

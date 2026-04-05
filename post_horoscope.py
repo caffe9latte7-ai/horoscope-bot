@@ -5,17 +5,12 @@ from kerykeion import AstrologicalSubject
 from google import genai
 import tweepy
 
-# .envファイルからAPIキーを読み込む
 load_dotenv()
 
+JST = timezone(timedelta(hours=9))
 
 def get_astrology_data():
-    """kerykeionで今日の惑星位置を計算する"""
-
-    JST = timezone(timedelta(hours=9))
-   now = datetime.now(JST)
-
-    # 今日の日時・東京の位置情報をもとに天体配置を計算する
+    now = datetime.now(JST)
     subject = AstrologicalSubject(
         name="Today",
         year=now.year,
@@ -23,36 +18,27 @@ def get_astrology_data():
         day=now.day,
         hour=now.hour,
         minute=now.minute,
-        lng=139.6503,    # 東京の経度
-        lat=35.6762,     # 東京の緯度
+        lng=139.6503,
+        lat=35.6762,
         tz_str="Asia/Tokyo",
     )
-
-    # 主要な7つの天体の位置をまとめる
     planets = [
-        ("太陽",   subject.sun),
-        ("月",     subject.moon),
-        ("水星",   subject.mercury),
-        ("金星",   subject.venus),
-        ("火星",   subject.mars),
-        ("木星",   subject.jupiter),
-        ("土星",   subject.saturn),
+        ("太陽", subject.sun),
+        ("月", subject.moon),
+        ("水星", subject.mercury),
+        ("金星", subject.venus),
+        ("火星", subject.mars),
+        ("木星", subject.jupiter),
+        ("土星", subject.saturn),
     ]
-
     lines = []
     for name, planet in planets:
         lines.append(f"{name}：{planet['sign']}座 {planet['position']:.1f}度")
-
     return "\n".join(lines)
 
-
 def generate_horoscope(astrology_data):
-    """Gemini APIを使って牡羊座向けの一言を生成する"""
-
     client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-    JST = timezone(timedelta(hours=9))
     today = datetime.now(JST).date()
-
     prompt = (
         f"今日は{today.strftime('%Y年%m月%d日')}です。\n\n"
         f"今日の惑星配置：\n{astrology_data}\n\n"
@@ -67,7 +53,6 @@ def generate_horoscope(astrology_data):
         "- ハッシュタグを末尾に2〜3個つける（例：#牡羊座 #今日の運勢 #占星術）\n"
         "- 上記の形式のみ出力する（説明文や前置きは不要）"
     )
-
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
@@ -75,12 +60,8 @@ def generate_horoscope(astrology_data):
     prefix = f"【{today.strftime('%Y年%m月%d日')}の牡羊座】\n"
     return prefix + response.text.strip()
 
-
 def generate_lucky_action(astrology_data):
-    """Gemini APIを使って面白おかしいラッキーアクションを生成する"""
-
     client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-
     prompt = (
         f"今日の惑星配置：\n{astrology_data}\n\n"
         "牡羊座向けの今日のラッキーアクションを1つ考えてください。\n\n"
@@ -89,16 +70,13 @@ def generate_lucky_action(astrology_data):
         "- 日常でできる具体的なこと\n"
         "- 30字以内の短い一文のみ出力する（説明文や前置きは不要）"
     )
-
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
     )
     return response.text.strip()
 
-
 def get_x_client():
-    """X APIのクライアントを作成する（投稿・リプライで共用）"""
     return tweepy.Client(
         consumer_key=os.getenv("X_API_KEY"),
         consumer_secret=os.getenv("X_API_SECRET"),
@@ -106,20 +84,15 @@ def get_x_client():
         access_token_secret=os.getenv("X_ACCESS_SECRET"),
     )
 
-
 def post_to_x(text):
-    """X APIを使ってメイン投稿する"""
     client = get_x_client()
     response = client.create_tweet(text=text)
     return response
 
-
 def reply_to_x(text, reply_to_id):
-    """X APIを使って指定ツイートにリプライする"""
     client = get_x_client()
     response = client.create_tweet(text=text, in_reply_to_tweet_id=reply_to_id)
     return response
-
 
 def main():
     print("今日の惑星配置を計算中...")
@@ -142,7 +115,6 @@ def main():
     print("ラッキーアクションをリプライ中...")
     reply_to_x(lucky_action, reply_to_id=tweet_id)
     print("リプライ完了！")
-
 
 if __name__ == "__main__":
     main()

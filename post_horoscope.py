@@ -13,7 +13,7 @@ def get_astrology_data():
     """kerykeionで今日の惑星位置を計算する"""
 
     JST = timezone(timedelta(hours=9))
-　　 now = datetime.now(JST)
+   now = datetime.now(JST)
 
     # 今日の日時・東京の位置情報をもとに天体配置を計算する
     subject = AstrologicalSubject(

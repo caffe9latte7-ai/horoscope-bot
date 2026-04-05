@@ -1,8 +1,9 @@
-name: 牡羊座ホロスコープ自動投稿
+name: 50代シングルマザーの日常投稿
 
 on:
   schedule:
-    - cron: '0 22 * * *'  # 毎日 JST 6:00（UTC 22:00）
+    - cron: '0 21 * * *'  # 毎日 JST 6:00（朝）
+    - cron: '0 9 * * *'   # 毎日 JST 18:00（夕方）
   workflow_dispatch:
 
 jobs:

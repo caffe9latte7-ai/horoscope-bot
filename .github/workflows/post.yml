@@ -25,8 +25,14 @@ jobs:
       - name: スクリプトを実行
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          X_API_KEY: ${{ secrets.X_API_KEY }}
-          X_API_SECRET: ${{ secrets.X_API_SECRET }}
-          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: python post_horoscope.py
+
+      - name: 過去投稿を保存
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add past_posts.json || true
+          git diff --staged --quiet || git commit -m "過去投稿を更新"
+          git push || true

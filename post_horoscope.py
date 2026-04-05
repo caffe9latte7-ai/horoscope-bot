@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from dotenv import load_dotenv
 from kerykeion import AstrologicalSubject
 from google import genai
@@ -12,7 +12,8 @@ load_dotenv()
 def get_astrology_data():
     """kerykeionで今日の惑星位置を計算する"""
 
-    now = datetime.now()
+    JST = timezone(timedelta(hours=9))
+　　 now = datetime.now(JST)
 
     # 今日の日時・東京の位置情報をもとに天体配置を計算する
     subject = AstrologicalSubject(
@@ -49,7 +50,8 @@ def generate_horoscope(astrology_data):
     """Gemini APIを使って牡羊座向けの一言を生成する"""
 
     client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-    today = date.today()
+    JST = timezone(timedelta(hours=9))
+    today = datetime.now(JST).date()
 
     prompt = (
         f"今日は{today.strftime('%Y年%m月%d日')}です。\n\n"
